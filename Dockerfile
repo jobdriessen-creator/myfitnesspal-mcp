@@ -2,10 +2,16 @@ FROM python:3.12-slim
 
 WORKDIR /app
 
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends nginx \
+    && rm -rf /var/lib/apt/lists/*
+
 COPY . .
 
 RUN python -m pip install --no-cache-dir .
 
-EXPOSE 8484
+COPY nginx.conf /etc/nginx/nginx.conf
 
-CMD ["mfp-mcp", "--http", "--host", "0.0.0.0", "--port", "8484"]
+EXPOSE 8080
+
+CMD ["sh", "-c", "mfp-mcp --http --host 127.0.0.1 --port 8484 & exec nginx -g 'daemon off;'"]
