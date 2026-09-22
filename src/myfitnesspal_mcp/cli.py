@@ -1,8 +1,8 @@
-from mcp.server.transport_security import TransportSecuritySettings
-
 import argparse
 import logging
 import sys
+
+from mcp.server.transport_security import TransportSecuritySettings
 
 
 def main() -> None:
@@ -23,10 +23,15 @@ def main() -> None:
         help="serve over streamable HTTP instead of stdio",
     )
     parser.add_argument(
-        "--host", default="127.0.0.1", help="HTTP bind host (default 127.0.0.1)"
+        "--host",
+        default="127.0.0.1",
+        help="HTTP bind host (default 127.0.0.1)",
     )
     parser.add_argument(
-        "--port", type=int, default=8484, help="HTTP port (default 8484)"
+        "--port",
+        type=int,
+        default=8484,
+        help="HTTP port (default 8484)",
     )
     args = parser.parse_args()
 
@@ -39,23 +44,22 @@ def main() -> None:
 
     from .server import mcp
 
-if args.http:
-    mcp.settings.host = args.host
-    mcp.settings.port = args.port
+    if args.http:
+        security = TransportSecuritySettings(
+            allowed_hosts=[
+                "myfitnesspal-mcp-production-e316.up.railway.app",
+                "myfitnesspal-mcp-production-e316.up.railway.app:*",
+                "mfp.jobdriessen.com",
+                "mfp.jobdriessen.com:*",
+            ]
+        )
 
-    security = TransportSecuritySettings(
-        allowed_hosts=[
-            "myfitnesspal-mcp-production-e316.up.railway.app",
-            "myfitnesspal-mcp-production-e316.up.railway.app:*",
-            "mfp.jobdriessen.com",
-            "mfp.jobdriessen.com:*",
-        ]
-    )
-
-    mcp.run(
-        transport="streamable-http",
-        transport_security=security,
-    )
+        mcp.run(
+            transport="streamable-http",
+            host=args.host,
+            port=args.port,
+            transport_security=security,
+        )
     else:
         mcp.run()
 
