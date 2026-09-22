@@ -1,3 +1,5 @@
+from mcp.server.transport_security import TransportSecuritySettings
+
 import argparse
 import logging
 import sys
@@ -37,10 +39,23 @@ def main() -> None:
 
     from .server import mcp
 
-    if args.http:
-        mcp.settings.host = args.host
-        mcp.settings.port = args.port
-        mcp.run(transport="streamable-http")
+if args.http:
+    mcp.settings.host = args.host
+    mcp.settings.port = args.port
+
+    security = TransportSecuritySettings(
+        allowed_hosts=[
+            "myfitnesspal-mcp-production-e316.up.railway.app",
+            "myfitnesspal-mcp-production-e316.up.railway.app:*",
+            "mfp.jobdriessen.com",
+            "mfp.jobdriessen.com:*",
+        ]
+    )
+
+    mcp.run(
+        transport="streamable-http",
+        transport_security=security,
+    )
     else:
         mcp.run()
 
